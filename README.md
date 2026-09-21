@@ -74,3 +74,32 @@ Outputs are written to:
 To force a specific ball count:
 
     python -m chainshot generate --count 1000 --seed 20260921 --balls 5
+
+## Candidate statistics and Phase 4 metrics
+
+Each generation run now writes three files:
+
+    output/run_<seed>/candidates.jsonl
+    output/run_<seed>/unique.jsonl
+    output/run_<seed>/summary.json
+
+The summary includes:
+
+- PAR distribution
+- object-ball-count distribution
+- shortest-solution-count distribution
+- unique-solution candidate count
+
+Each candidate also carries trace-derived metrics:
+
+- sink delay
+- setup shots
+- cue-only reposition shots
+- object-ball transport distance
+- max / average collision cascade
+- initial / maximum cascade capacity
+- built-chain gain
+- direction diversity
+- endgame sinks and sink streak
+
+These metrics are computed only after a board survives the BFS candidate filter, keeping bulk generation cheap.
