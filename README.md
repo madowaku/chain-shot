@@ -53,3 +53,24 @@ The simulator is the only source of truth for game rules.
 - Human playtesting decides which levels are actually good.
 
 See `TASKS.md` for the Level Generator v0.1 roadmap.
+
+## Generate candidate levels
+
+Run a small smoke test first:
+
+    python -m chainshot generate --count 100 --seed 20260921
+
+Then run the first mining batch:
+
+    python -m chainshot generate --count 10000 --seed 20260921
+
+Generation uses the weighted object-ball distribution 3/4/5/6 = 20%/30%/30%/20%, removes duplicates under the four table-preserving symmetries, solves each unique board with BFS, and keeps only boards whose minimum solution length is 4-12 moves.
+
+Outputs are written to:
+
+    output/run_<seed>/candidates.jsonl
+    output/run_<seed>/summary.json
+
+To force a specific ball count:
+
+    python -m chainshot generate --count 1000 --seed 20260921 --balls 5
