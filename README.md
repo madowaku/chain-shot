@@ -170,3 +170,34 @@ Outputs:
     output/run_20260921/benchmark_v02/mutation_v01/summary.json
     output/run_20260921/benchmark_v02/mutation_v01/parent_beaters.json
     output/run_20260921/benchmark_v02/mutation_v01/parent_beaters.txt
+
+## Mutation Generator v0.2
+
+Mutation v0.2 turns the one-step miner into a two-generation evolutionary search.
+
+The v0.1 run showed that every parent-beating child came from adding one object ball, so v0.2 uses identity-biased operator weights. When a parent has fewer than six object balls, addition is favored, especially an aligned addition that shares a row or column with the cue or an existing object ball.
+
+Generation flow:
+
+    benchmark Top generated roots
+        -> generation 1
+        -> keep strict parent beaters
+        -> choose up to 2 elites per root, preferring unique solutions
+        -> generation 2
+        -> keep strict parent beaters
+        -> combined lineage ranking
+
+Default run:
+
+    python -m chainshot evolve --parents output/run_20260921/benchmark_v02/combined_ranking.json --top 3 --first-generation 500 --second-generation 250 --elites-per-root 2 --seed 20260921
+
+Outputs:
+
+    output/run_20260921/benchmark_v02/mutation_v02/summary.json
+    output/run_20260921/benchmark_v02/mutation_v02/all_beaters.json
+    output/run_20260921/benchmark_v02/mutation_v02/top_20.json
+    output/run_20260921/benchmark_v02/mutation_v02/elite.json
+    output/run_20260921/benchmark_v02/mutation_v02/ranking.txt
+    output/run_20260921/benchmark_v02/mutation_v02/lineage_review.txt
+
+The lineage review shows the direct parent and child as ASCII boards plus the exact cue/ball coordinate difference, so a score increase can be inspected as a design change rather than trusted blindly.
