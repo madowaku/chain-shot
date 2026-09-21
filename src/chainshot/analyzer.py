@@ -5,7 +5,7 @@ from statistics import fmean
 
 from .models import Direction, State
 from .simulator import simulate_shot
-from .solver import SolveResult
+from .solver import SolveResult, solve
 
 
 ENDGAME_WINDOW = 3
@@ -22,6 +22,7 @@ class PathMetrics:
     initial_cascade_capacity: int
     max_cascade_capacity: int
     built_chain_gain: int
+    temptation_count: int
     direction_count: int
     direction_changes: int
     endgame_sinks: int
@@ -39,6 +40,7 @@ class LevelMetrics:
     initial_cascade_capacity: int
     max_cascade_capacity: int
     built_chain_gain: int
+    temptation_count: int
     direction_count: float
     direction_changes: float
     endgame_sinks: float
@@ -55,6 +57,7 @@ class LevelMetrics:
             "initialCascadeCapacity": self.initial_cascade_capacity,
             "maxCascadeCapacity": self.max_cascade_capacity,
             "builtChainGain": self.built_chain_gain,
+            "temptationCount": self.temptation_count,
             "directionCount": round(self.direction_count, 3),
             "directionChanges": round(self.direction_changes, 3),
             "endgameSinks": round(self.endgame_sinks, 3),
@@ -73,9 +76,75 @@ def cascade_capacity(state: State) -> int:
     )
 
 
-def analyze_path(initial: State, solution: tuple[Direction, ...]) -> PathMetrics:
+def temptation_directions(
+    state: State,
+    optimal_remaining: int,
+    *,
+    max_states: int = 50_000,
+    cache: dict[tuple[State, int], bool] | None = None,
+) -> tuple[Direction, ...]:
+    """Return immediate sinking actions that fail to preserve the optimal budget.
+
+    If the current state is optimally solvable in R shots, a sinking action is
+    tempting when its successor cannot finish within R-1 shots. This deliberately
+    treats both true dead ends and merely longer routes as temptations.
+    """
+    if optimal_remaining <= 0:
+        return ()
+
+    local_cache = cache if cache is not None else {}
+    temptations: list[Direction] = []
+
+    for direction in Direction:
+        shot = simulate_shot(state, direction)
+        if (
+            not shot.legal
+            or not shot.changed
+            or shot.next_state is None
+            or shot.sunk_count <= 0
+        ):
+            continue
+
+        budget = optimal_remaining - 1
+        key = (shot.next_state, budget)
+
+        preserves_optimal = local_cache.get(key)
+        if preserves_optimal is None:
+            if shot.next_state.balls == 0:
+                preserves_optimal = budget >= 0
+            elif budget <= 0:
+                preserves_optimal = False
+            else:
+                followup = solve(
+                    shot.next_state,
+                    max_depth=budget,
+                    max_states=max_states,
+                    sample_limit=1,
+                )
+                preserves_optimal = (
+                    followup.solvable
+                    and not followup.exhausted
+                    and followup.min_moves is not None
+                    and followup.min_moves <= budget
+                )
+            local_cache[key] = preserves_optimal
+
+        if not preserves_optimal:
+            temptations.append(direction)
+
+    return tuple(temptations)
+
+
+def analyze_path(
+    initial: State,
+    solution: tuple[Direction, ...],
+    *,
+    max_states: int = 50_000,
+) -> PathMetrics:
     state = initial
     capacities = [cascade_capacity(state)]
+    temptation_cache: dict[tuple[State, int], bool] = {}
+    temptation_pairs: set[tuple[State, Direction]] = set()
 
     sink_delay = 0
     first_sink_seen = False
@@ -85,7 +154,16 @@ def analyze_path(initial: State, solution: tuple[Direction, ...]) -> PathMetrics
     cascades: list[int] = []
     sunk_per_shot: list[int] = []
 
-    for direction in solution:
+    for index, direction in enumerate(solution):
+        remaining = len(solution) - index
+        for tempting_direction in temptation_directions(
+            state,
+            remaining,
+            max_states=max_states,
+            cache=temptation_cache,
+        ):
+            temptation_pairs.add((state, tempting_direction))
+
         result = simulate_shot(state, direction, trace=True)
         if not result.legal or not result.changed or result.next_state is None:
             raise ValueError("solution contains an illegal or no-op action")
@@ -141,6 +219,7 @@ def analyze_path(initial: State, solution: tuple[Direction, ...]) -> PathMetrics
         initial_cascade_capacity=initial_capacity,
         max_cascade_capacity=max_capacity,
         built_chain_gain=max(0, max_capacity - initial_capacity),
+        temptation_count=len(temptation_pairs),
         direction_count=direction_count,
         direction_changes=direction_changes,
         endgame_sinks=endgame_sinks,
@@ -148,11 +227,19 @@ def analyze_path(initial: State, solution: tuple[Direction, ...]) -> PathMetrics
     )
 
 
-def analyze_level(initial: State, solve_result: SolveResult) -> LevelMetrics:
+def analyze_level(
+    initial: State,
+    solve_result: SolveResult,
+    *,
+    max_states: int = 50_000,
+) -> LevelMetrics:
     if not solve_result.solvable or not solve_result.sample_solutions:
         raise ValueError("level must have at least one sampled solution")
 
-    paths = [analyze_path(initial, solution) for solution in solve_result.sample_solutions]
+    paths = [
+        analyze_path(initial, solution, max_states=max_states)
+        for solution in solve_result.sample_solutions
+    ]
 
     return LevelMetrics(
         sink_delay=fmean(path.sink_delay for path in paths),
@@ -164,6 +251,7 @@ def analyze_level(initial: State, solve_result: SolveResult) -> LevelMetrics:
         initial_cascade_capacity=paths[0].initial_cascade_capacity,
         max_cascade_capacity=max(path.max_cascade_capacity for path in paths),
         built_chain_gain=max(path.built_chain_gain for path in paths),
+        temptation_count=max(path.temptation_count for path in paths),
         direction_count=fmean(path.direction_count for path in paths),
         direction_changes=fmean(path.direction_changes for path in paths),
         endgame_sinks=fmean(path.endgame_sinks for path in paths),
