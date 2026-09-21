@@ -103,3 +103,21 @@ Each candidate also carries trace-derived metrics:
 - endgame sinks and sink streak
 
 These metrics are computed only after a board survives the BFS candidate filter, keeping bulk generation cheap.
+
+## Phase 4 ranking
+
+Candidate analysis now includes:
+
+- temptationCount
+- difficultyScore
+- interestingnessScore
+
+A temptation is an immediately available sinking action that cannot preserve the current optimal remaining shot budget. It may be a true dead end or simply a slower route; both are useful as "don't take the obvious sink" signals.
+
+Difficulty and interestingness are intentionally separate. Difficulty emphasizes solution depth and BFS search complexity. Interestingness emphasizes CHAIN SHOT-specific structure such as built chains, setup shots, temptation traps, transport, cascades, and endgame payoff.
+
+Each generation run also writes:
+
+    output/run_<seed>/top_20.json
+
+This file is ranked by provisional interestingness, then difficulty. The weights are heuristics for triage, not claims about fun. Human playtesting should retune them.
