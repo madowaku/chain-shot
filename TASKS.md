@@ -44,15 +44,17 @@ random board -> exact BFS solve -> feature analysis -> interestingness ranking -
 - [x] Ball transport distance
 - [x] Max / average cascade
 - [x] Built-chain gain
-- [ ] Temptation traps
+- [x] Temptation traps
 - [x] Direction diversity
 - [x] Endgame payoff
-- [ ] Difficulty score
-- [ ] Interestingness score
+- [x] Difficulty score
+- [x] Interestingness score
 
 ## Phase 5: Mining run
 
-- [ ] Generate 10,000 boards
+- [x] Export Top 20 by provisional interestingness
+
+- [x] Generate 10,000 boards
 - [ ] Export unique-solution candidates
 - [ ] Export Top 100
 - [ ] Human-rate at least 20 candidates
