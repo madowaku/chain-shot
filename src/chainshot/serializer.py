@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Iterable
 
 from .generator import Candidate, GenerationSummary
+from .review import render_top_candidates
 
 
 def write_candidates_jsonl(path: Path, candidates: Iterable[Candidate]) -> None:
@@ -30,3 +31,8 @@ def write_candidates_json(path: Path, candidates: Iterable[Candidate]) -> None:
         json.dumps(data, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
+
+
+def write_candidates_ascii(path: Path, candidates: Iterable[Candidate]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(render_top_candidates(candidates), encoding="utf-8")
