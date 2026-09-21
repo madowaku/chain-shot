@@ -83,3 +83,13 @@ random board -> exact BFS solve -> feature analysis -> interestingness ranking -
 - [x] Re-solve mutations with BFS
 - [x] Re-score with Evaluator v0.2
 - [x] Keep only children that beat their parent interestingness score
+
+## Mutation Generator v0.2
+
+- [x] Bias mutations toward object-ball addition
+- [x] Add row/column-aligned ball addition
+- [x] Promote parent-beating children into generation 2
+- [x] Prefer unique-solution elites
+- [x] Preserve global symmetry dedupe across generations
+- [x] Export lineage-aware Top 20
+- [x] Export parent/child ASCII diff review
