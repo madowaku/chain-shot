@@ -60,6 +60,10 @@ def _cmd_generate(
     )
 
     write_candidates_jsonl(output_dir / "candidates.jsonl", candidates)
+    write_candidates_jsonl(
+        output_dir / "unique.jsonl",
+        [candidate for candidate in candidates if candidate.solve_result.shortest_solution_count == 1],
+    )
     write_summary_json(output_dir / "summary.json", summary)
 
     print("CHAIN SHOT LEVEL GENERATOR v0.1")
@@ -72,6 +76,11 @@ def _cmd_generate(
     print(f"Unsolved / >{max_moves} moves: {summary.unsolved_or_too_hard:,}")
     print(f"Too easy (<{min_moves} moves): {summary.too_easy:,}")
     print(f"Candidates: {summary.candidates:,}")
+    print(f"Unique candidates: {summary.unique_candidates:,}")
+    print()
+    print("PAR distribution:", summary.par_distribution)
+    print("Ball-count distribution:", summary.ball_count_distribution)
+    print("Solution-count distribution:", summary.solution_count_distribution)
     print()
     print(f"Output: {output_dir}")
     return 0
