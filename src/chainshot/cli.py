@@ -7,7 +7,7 @@ from pathlib import Path
 from .constants import to_cell
 from .generator import generate_candidates
 from .models import State, bitboard_from_cells
-from .serializer import write_candidates_jsonl, write_summary_json
+from .serializer import write_candidates_json, write_candidates_jsonl, write_summary_json
 from .solver import solve
 
 
@@ -64,6 +64,16 @@ def _cmd_generate(
         output_dir / "unique.jsonl",
         [candidate for candidate in candidates if candidate.solve_result.shortest_solution_count == 1],
     )
+    ranked = sorted(
+        candidates,
+        key=lambda candidate: (
+            candidate.scores.interestingness,
+            candidate.scores.difficulty,
+            -(candidate.solve_result.shortest_solution_count),
+        ),
+        reverse=True,
+    )
+    write_candidates_json(output_dir / "top_20.json", ranked[:20])
     write_summary_json(output_dir / "summary.json", summary)
 
     print("CHAIN SHOT LEVEL GENERATOR v0.1")
@@ -82,6 +92,19 @@ def _cmd_generate(
     print("Ball-count distribution:", summary.ball_count_distribution)
     print("Solution-count distribution:", summary.solution_count_distribution)
     print()
+    if ranked:
+        print("Top candidates:")
+        for rank, candidate in enumerate(ranked[:5], start=1):
+            print(
+                f"  {rank:02d}. {candidate.candidate_id} "
+                f"I={candidate.scores.interestingness:.1f} "
+                f"D={candidate.scores.difficulty:.1f} "
+                f"PAR={candidate.solve_result.min_moves} "
+                f"SOL={candidate.solve_result.shortest_solution_count} "
+                f"T={candidate.metrics.temptation_count} "
+                f"BC=+{candidate.metrics.built_chain_gain}"
+            )
+        print()
     print(f"Output: {output_dir}")
     return 0
 
