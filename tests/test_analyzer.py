@@ -29,7 +29,9 @@ def test_zipper_metrics_capture_built_chain_and_payoff() -> None:
     assert metrics.setup_shots == 0
     assert metrics.initial_cascade_capacity == 0
     assert metrics.max_cascade_capacity == 3
-    assert metrics.built_chain_gain == 3
+    assert metrics.initial_chain_capacity == 0
+    assert metrics.max_chain_capacity == 2
+    assert metrics.built_chain_gain == 2
     assert metrics.max_cascade == 3
     assert metrics.endgame_sinks == 3
     assert metrics.endgame_sink_streak == 3
