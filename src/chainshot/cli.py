@@ -8,6 +8,7 @@ from .benchmark import benchmark_core_and_generated, render_benchmark, write_ben
 from .constants import to_cell
 from .generator import generate_candidates
 from .models import State, bitboard_from_cells
+from .mutation import load_top_generated_parents, render_mutation_run, run_mutation_search, write_mutation_run
 from .review import render_top_dicts
 from .serializer import write_candidates_ascii, write_candidates_json, write_candidates_jsonl, write_summary_json
 from .solver import solve
@@ -174,6 +175,29 @@ def build_parser() -> argparse.ArgumentParser:
     benchmark_parser.add_argument("--max-depth", type=int, default=12)
     benchmark_parser.add_argument("--max-states", type=int, default=50_000)
 
+    mutate_parser = subparsers.add_parser(
+        "mutate",
+        help="Mutate top generated benchmark parents and keep only parent-beating children",
+    )
+    mutate_parser.add_argument(
+        "--parents",
+        type=Path,
+        required=True,
+        help="Path to benchmark_v02/combined_ranking.json",
+    )
+    mutate_parser.add_argument("--top", type=int, default=3)
+    mutate_parser.add_argument("--per-parent", type=int, default=500)
+    mutate_parser.add_argument("--seed", type=int, default=20260921)
+    mutate_parser.add_argument("--min-moves", type=int, default=4)
+    mutate_parser.add_argument("--max-moves", type=int, default=12)
+    mutate_parser.add_argument("--max-states", type=int, default=50_000)
+    mutate_parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+        help="Output directory. Default: alongside parent benchmark in mutation_v01/",
+    )
+
     return parser
 
 
@@ -200,6 +224,27 @@ def main() -> int:
         write_benchmark_json(output_dir / "combined_ranking.json", entries)
         write_benchmark_text(output_dir / "combined_ranking.txt", entries)
         print(render_benchmark(entries), end="")
+        print(f"Output: {output_dir}")
+        return 0
+
+    if args.command == "mutate":
+        parents = load_top_generated_parents(
+            args.parents,
+            top_n=args.top,
+            max_depth=args.max_moves,
+            max_states=args.max_states,
+        )
+        run = run_mutation_search(
+            parents=parents,
+            per_parent=args.per_parent,
+            seed=args.seed,
+            min_moves=args.min_moves,
+            max_moves=args.max_moves,
+            max_states=args.max_states,
+        )
+        output_dir = args.output or args.parents.parent / "mutation_v01"
+        write_mutation_run(output_dir, run)
+        print(render_mutation_run(run), end="")
         print(f"Output: {output_dir}")
         return 0
 
