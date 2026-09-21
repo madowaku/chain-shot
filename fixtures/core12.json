@@ -1,0 +1,448 @@
+{
+  "version": 1,
+  "coordinateSystem": {
+    "origin": "top-left",
+    "rowRange": [
+      0,
+      6
+    ],
+    "colRange": [
+      0,
+      6
+    ]
+  },
+  "pockets": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      3
+    ],
+    [
+      0,
+      6
+    ],
+    [
+      6,
+      0
+    ],
+    [
+      6,
+      3
+    ],
+    [
+      6,
+      6
+    ]
+  ],
+  "levels": [
+    {
+      "id": "CORE-001",
+      "name": "FIRST HIT",
+      "cue": [
+        5,
+        3
+      ],
+      "balls": [
+        [
+          3,
+          3
+        ]
+      ],
+      "expectedPar": 1,
+      "expectedShortestSolutions": 1,
+      "canonicalSolution": [
+        "UP"
+      ]
+    },
+    {
+      "id": "CORE-002",
+      "name": "TRANSFER",
+      "cue": [
+        4,
+        6
+      ],
+      "balls": [
+        [
+          2,
+          6
+        ],
+        [
+          3,
+          6
+        ]
+      ],
+      "expectedPar": 2,
+      "expectedShortestSolutions": 1,
+      "canonicalSolution": [
+        "UP",
+        "UP"
+      ]
+    },
+    {
+      "id": "CORE-003",
+      "name": "REPOSITION",
+      "cue": [
+        2,
+        3
+      ],
+      "balls": [
+        [
+          3,
+          0
+        ],
+        [
+          3,
+          3
+        ]
+      ],
+      "expectedPar": 3,
+      "expectedShortestSolutions": 1,
+      "canonicalSolution": [
+        "DOWN",
+        "LEFT",
+        "DOWN"
+      ]
+    },
+    {
+      "id": "CORE-004",
+      "name": "DON'T SINK YET",
+      "cue": [
+        4,
+        6
+      ],
+      "balls": [
+        [
+          2,
+          6
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "expectedPar": 4,
+      "expectedShortestSolutions": 1,
+      "canonicalSolution": [
+        "LEFT",
+        "UP",
+        "LEFT",
+        "DOWN"
+      ]
+    },
+    {
+      "id": "CORE-005",
+      "name": "ZIPPER",
+      "cue": [
+        1,
+        2
+      ],
+      "balls": [
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          5,
+          0
+        ]
+      ],
+      "expectedPar": 4,
+      "expectedShortestSolutions": 1,
+      "canonicalSolution": [
+        "LEFT",
+        "DOWN",
+        "DOWN",
+        "DOWN"
+      ]
+    },
+    {
+      "id": "CORE-006",
+      "name": "NOT YET",
+      "cue": [
+        4,
+        3
+      ],
+      "balls": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          4
+        ]
+      ],
+      "expectedPar": 5,
+      "expectedShortestSolutions": 1,
+      "canonicalSolution": [
+        "RIGHT",
+        "UP",
+        "UP",
+        "RIGHT",
+        "DOWN"
+      ]
+    },
+    {
+      "id": "CORE-007",
+      "name": "LOAD THEN FIRE",
+      "cue": [
+        1,
+        5
+      ],
+      "balls": [
+        [
+          1,
+          4
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          5,
+          6
+        ]
+      ],
+      "expectedPar": 7,
+      "expectedShortestSolutions": 1,
+      "canonicalSolution": [
+        "LEFT",
+        "RIGHT",
+        "DOWN",
+        "LEFT",
+        "UP",
+        "UP",
+        "UP"
+      ]
+    },
+    {
+      "id": "CORE-008",
+      "name": "TWO TOWERS",
+      "cue": [
+        5,
+        5
+      ],
+      "balls": [
+        [
+          1,
+          6
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          5,
+          4
+        ]
+      ],
+      "expectedPar": 7,
+      "expectedShortestSolutions": 1,
+      "canonicalSolution": [
+        "LEFT",
+        "RIGHT",
+        "UP",
+        "UP",
+        "LEFT",
+        "DOWN",
+        "DOWN"
+      ]
+    },
+    {
+      "id": "CORE-009",
+      "name": "MAKE THE LANE",
+      "cue": [
+        1,
+        2
+      ],
+      "balls": [
+        [
+          1,
+          4
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          5,
+          0
+        ],
+        [
+          5,
+          3
+        ]
+      ],
+      "expectedPar": 8,
+      "expectedShortestSolutions": 1,
+      "canonicalSolution": [
+        "RIGHT",
+        "DOWN",
+        "LEFT",
+        "RIGHT",
+        "UP",
+        "LEFT",
+        "DOWN",
+        "DOWN"
+      ]
+    },
+    {
+      "id": "CORE-010",
+      "name": "DOUBLE CASCADE",
+      "cue": [
+        4,
+        3
+      ],
+      "balls": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          6
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          3,
+          6
+        ],
+        [
+          5,
+          6
+        ]
+      ],
+      "expectedPar": 9,
+      "expectedShortestSolutions": 1,
+      "canonicalSolution": [
+        "RIGHT",
+        "UP",
+        "UP",
+        "LEFT",
+        "DOWN",
+        "LEFT",
+        "UP",
+        "UP",
+        "UP"
+      ]
+    },
+    {
+      "id": "CORE-011",
+      "name": "RELAY BUILDER",
+      "cue": [
+        4,
+        4
+      ],
+      "balls": [
+        [
+          1,
+          6
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          5,
+          0
+        ]
+      ],
+      "expectedPar": 9,
+      "expectedShortestSolutions": 1,
+      "canonicalSolution": [
+        "LEFT",
+        "UP",
+        "LEFT",
+        "RIGHT",
+        "UP",
+        "LEFT",
+        "DOWN",
+        "DOWN",
+        "DOWN"
+      ]
+    },
+    {
+      "id": "CORE-012",
+      "name": "CHAIN REACTION",
+      "cue": [
+        1,
+        1
+      ],
+      "balls": [
+        [
+          1,
+          4
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          5,
+          0
+        ],
+        [
+          5,
+          6
+        ]
+      ],
+      "expectedPar": 11,
+      "expectedShortestSolutions": 1,
+      "canonicalSolution": [
+        "RIGHT",
+        "DOWN",
+        "RIGHT",
+        "DOWN",
+        "LEFT",
+        "RIGHT",
+        "UP",
+        "LEFT",
+        "DOWN",
+        "DOWN",
+        "DOWN"
+      ]
+    }
+  ]
+}
