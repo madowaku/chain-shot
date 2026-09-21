@@ -22,10 +22,10 @@ random board -> exact BFS solve -> feature analysis -> interestingness ranking -
 
 ## Phase 2: Core 12 regression
 
-- [ ] Encode the hand-authored Core 12 as fixtures/core12.json
-- [ ] Verify every expected PAR with the BFS solver
-- [ ] Verify shortest-solution counts
-- [ ] Add regression tests so rule changes cannot silently break the Core 12
+- [x] Encode the hand-authored Core 12 as fixtures/core12.json
+- [x] Verify every expected PAR with the BFS solver
+- [x] Verify shortest-solution counts
+- [x] Add regression tests so rule changes cannot silently break the Core 12
 
 ## Phase 3: Generator
 
