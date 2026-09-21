@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import random
+from collections import Counter
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Iterable
 
+from .analyzer import LevelMetrics, analyze_level
 from .constants import CELL_COUNT, POCKET_CELLS, to_coord
-from .models import Direction, State, bitboard_from_cells, cells_from_bitboard
+from .models import State, bitboard_from_cells, cells_from_bitboard
 from .solver import SolveResult, solve
 from .symmetry import canonical_key
 
@@ -20,6 +20,7 @@ class Candidate:
     candidate_id: str
     state: State
     solve_result: SolveResult
+    metrics: LevelMetrics
 
     def to_dict(self) -> dict:
         cue_row, cue_col = to_coord(self.state.cue)
@@ -29,16 +30,19 @@ class Candidate:
             if self.solve_result.sample_solutions
             else []
         )
+        analysis = {
+            "minMoves": self.solve_result.min_moves,
+            "solutionCount": self.solve_result.shortest_solution_count,
+            "visitedStates": self.solve_result.visited_states,
+            "expandedStates": self.solve_result.expanded_states,
+        }
+        analysis.update(self.metrics.to_dict())
+
         return {
             "id": self.candidate_id,
             "cue": [cue_row, cue_col],
             "balls": balls,
-            "analysis": {
-                "minMoves": self.solve_result.min_moves,
-                "solutionCount": self.solve_result.shortest_solution_count,
-                "visitedStates": self.solve_result.visited_states,
-                "expandedStates": self.solve_result.expanded_states,
-            },
+            "analysis": analysis,
             "solution": solution,
         }
 
@@ -53,6 +57,10 @@ class GenerationSummary:
     unsolved_or_too_hard: int
     too_easy: int
     candidates: int
+    unique_candidates: int
+    par_distribution: dict[str, int]
+    ball_count_distribution: dict[str, int]
+    solution_count_distribution: dict[str, int]
 
     def to_dict(self) -> dict:
         return {
@@ -64,7 +72,16 @@ class GenerationSummary:
             "unsolvedOrTooHard": self.unsolved_or_too_hard,
             "tooEasy": self.too_easy,
             "candidates": self.candidates,
+            "uniqueCandidates": self.unique_candidates,
+            "parDistribution": self.par_distribution,
+            "ballCountDistribution": self.ball_count_distribution,
+            "solutionCountDistribution": self.solution_count_distribution,
         }
+
+
+def _distribution(values: list[int]) -> dict[str, int]:
+    counts = Counter(values)
+    return {str(key): counts[key] for key in sorted(counts)}
 
 
 def generate_random_state(
@@ -139,8 +156,19 @@ def generate_candidates(
                 candidate_id=f"GEN-{index:06d}",
                 state=state,
                 solve_result=result,
+                metrics=analyze_level(state, result),
             )
         )
+
+    par_values = [
+        candidate.solve_result.min_moves
+        for candidate in candidates
+        if candidate.solve_result.min_moves is not None
+    ]
+    ball_counts = [candidate.state.balls.bit_count() for candidate in candidates]
+    solution_counts = [
+        candidate.solve_result.shortest_solution_count for candidate in candidates
+    ]
 
     summary = GenerationSummary(
         seed=seed,
@@ -151,5 +179,9 @@ def generate_candidates(
         unsolved_or_too_hard=unsolved_or_too_hard,
         too_easy=too_easy,
         candidates=len(candidates),
+        unique_candidates=sum(1 for count in solution_counts if count == 1),
+        par_distribution=_distribution(par_values),
+        ball_count_distribution=_distribution(ball_counts),
+        solution_count_distribution=_distribution(solution_counts),
     )
     return candidates, summary
