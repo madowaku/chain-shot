@@ -5,7 +5,9 @@ import json
 from pathlib import Path
 
 from .constants import to_cell
+from .generator import generate_candidates
 from .models import State, bitboard_from_cells
+from .serializer import write_candidates_jsonl, write_summary_json
 from .solver import solve
 
 
@@ -38,6 +40,43 @@ def _cmd_solve(path: Path, max_depth: int, max_states: int) -> int:
     return 0 if result.solvable else 1
 
 
+def _cmd_generate(
+    *,
+    count: int,
+    seed: int,
+    min_moves: int,
+    max_moves: int,
+    max_states: int,
+    ball_count: int | None,
+    output_dir: Path,
+) -> int:
+    candidates, summary = generate_candidates(
+        count=count,
+        seed=seed,
+        min_moves=min_moves,
+        max_moves=max_moves,
+        max_states=max_states,
+        ball_count=ball_count,
+    )
+
+    write_candidates_jsonl(output_dir / "candidates.jsonl", candidates)
+    write_summary_json(output_dir / "summary.json", summary)
+
+    print("CHAIN SHOT LEVEL GENERATOR v0.1")
+    print()
+    print(f"Seed: {summary.seed}")
+    print(f"Requested: {summary.requested:,}")
+    print(f"Generated unique: {summary.generated:,}")
+    print(f"Duplicates: {summary.duplicates:,}")
+    print(f"Exhausted: {summary.exhausted:,}")
+    print(f"Unsolved / >{max_moves} moves: {summary.unsolved_or_too_hard:,}")
+    print(f"Too easy (<{min_moves} moves): {summary.too_easy:,}")
+    print(f"Candidates: {summary.candidates:,}")
+    print()
+    print(f"Output: {output_dir}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="chainshot")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -46,13 +85,50 @@ def build_parser() -> argparse.ArgumentParser:
     solve_parser.add_argument("path", type=Path)
     solve_parser.add_argument("--max-depth", type=int, default=12)
     solve_parser.add_argument("--max-states", type=int, default=50_000)
+
+    generate_parser = subparsers.add_parser(
+        "generate",
+        help="Generate random boards, remove symmetric duplicates, and keep BFS candidates",
+    )
+    generate_parser.add_argument("--count", type=int, default=10_000)
+    generate_parser.add_argument("--seed", type=int, default=20260921)
+    generate_parser.add_argument("--min-moves", type=int, default=4)
+    generate_parser.add_argument("--max-moves", type=int, default=12)
+    generate_parser.add_argument("--max-states", type=int, default=50_000)
+    generate_parser.add_argument(
+        "--balls",
+        type=int,
+        choices=(3, 4, 5, 6),
+        default=None,
+        help="Force an exact object-ball count. Default uses weighted 3-6 generation.",
+    )
+    generate_parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+        help="Output directory. Default: output/run_<seed>",
+    )
     return parser
 
 
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
+
     if args.command == "solve":
         return _cmd_solve(args.path, args.max_depth, args.max_states)
+
+    if args.command == "generate":
+        output_dir = args.output or Path("output") / f"run_{args.seed}"
+        return _cmd_generate(
+            count=args.count,
+            seed=args.seed,
+            min_moves=args.min_moves,
+            max_moves=args.max_moves,
+            max_states=args.max_states,
+            ball_count=args.balls,
+            output_dir=output_dir,
+        )
+
     parser.error("unknown command")
     return 2
