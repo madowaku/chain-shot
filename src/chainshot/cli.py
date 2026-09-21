@@ -6,6 +6,7 @@ from pathlib import Path
 
 from .benchmark import benchmark_core_and_generated, render_benchmark, write_benchmark_json, write_benchmark_text
 from .constants import to_cell
+from .evolution import load_evolution_roots, render_evolution_run, run_evolution_search, write_evolution_run
 from .generator import generate_candidates
 from .models import State, bitboard_from_cells
 from .mutation import load_top_generated_parents, render_mutation_run, run_mutation_search, write_mutation_run
@@ -198,6 +199,31 @@ def build_parser() -> argparse.ArgumentParser:
         help="Output directory. Default: alongside parent benchmark in mutation_v01/",
     )
 
+    evolve_parser = subparsers.add_parser(
+        "evolve",
+        help="Run two-generation, identity-biased Mutation v0.2 search",
+    )
+    evolve_parser.add_argument(
+        "--parents",
+        type=Path,
+        required=True,
+        help="Path to benchmark_v02/combined_ranking.json",
+    )
+    evolve_parser.add_argument("--top", type=int, default=3)
+    evolve_parser.add_argument("--first-generation", type=int, default=500)
+    evolve_parser.add_argument("--second-generation", type=int, default=250)
+    evolve_parser.add_argument("--elites-per-root", type=int, default=2)
+    evolve_parser.add_argument("--seed", type=int, default=20260921)
+    evolve_parser.add_argument("--min-moves", type=int, default=4)
+    evolve_parser.add_argument("--max-moves", type=int, default=12)
+    evolve_parser.add_argument("--max-states", type=int, default=50_000)
+    evolve_parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+        help="Output directory. Default: alongside parent benchmark in mutation_v02/",
+    )
+
     return parser
 
 
@@ -245,6 +271,29 @@ def main() -> int:
         output_dir = args.output or args.parents.parent / "mutation_v01"
         write_mutation_run(output_dir, run)
         print(render_mutation_run(run), end="")
+        print(f"Output: {output_dir}")
+        return 0
+
+    if args.command == "evolve":
+        roots = load_evolution_roots(
+            args.parents,
+            top_n=args.top,
+            max_depth=args.max_moves,
+            max_states=args.max_states,
+        )
+        run = run_evolution_search(
+            roots=roots,
+            first_generation_per_parent=args.first_generation,
+            second_generation_per_parent=args.second_generation,
+            elites_per_root=args.elites_per_root,
+            seed=args.seed,
+            min_moves=args.min_moves,
+            max_moves=args.max_moves,
+            max_states=args.max_states,
+        )
+        output_dir = args.output or args.parents.parent / "mutation_v02"
+        write_evolution_run(output_dir, run)
+        print(render_evolution_run(run), end="")
         print(f"Output: {output_dir}")
         return 0
 
