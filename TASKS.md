@@ -67,3 +67,10 @@ random board -> exact BFS solve -> feature analysis -> interestingness ranking -
 3. Generator creates candidates. It does not decide what is fun.
 4. Evaluator ranks candidates. Human playtesting makes final selections.
 5. Any rule change must run the Core 12 regression suite first.
+
+## Evaluator v0.2 calibration
+
+- [x] Define true chain capacity: max(0, collision count - 1)
+- [x] Rebase built-chain gain on true chain capacity
+- [x] Add CHAIN SHOT identity penalties for no-chain boards
+- [x] Add mixed Core 12 + generated Top 20 benchmark
