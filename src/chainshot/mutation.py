@@ -7,7 +7,7 @@ from pathlib import Path
 
 from .benchmark import BenchmarkEntry, evaluate_entry, state_from_coords
 from .constants import BOARD_SIZE, CELL_COUNT, POCKET_CELLS
-from .models import State, add_ball, cells_from_bitboard, has_ball, remove_ball
+from .models import State, add_ball, cells_from_bitboard, remove_ball
 from .symmetry import canonical_key
 
 
@@ -37,24 +37,6 @@ class ParentSummary:
             "solvedChildren": self.solved_children,
             "beaters": self.beaters,
         }
-
-
-@dataclass(frozen=True, slots=True)
-class MutationEntry:
-    parent_id: str
-    operator: str
-    child: BenchmarkEntry
-
-    @property
-    def improvement(self) -> float:
-        return round(
-            self.child.scores.interestingness - self.parent_score,
-            1,
-        )
-
-    @property
-    def parent_score(self) -> float:
-        raise AttributeError("parent score is supplied during serialization")
 
 
 @dataclass(frozen=True, slots=True)
