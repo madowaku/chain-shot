@@ -21,3 +21,12 @@ def write_summary_json(path: Path, summary: GenerationSummary) -> None:
         json.dumps(summary.to_dict(), ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
+
+
+def write_candidates_json(path: Path, candidates: Iterable[Candidate]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data = [candidate.to_dict() for candidate in candidates]
+    path.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
