@@ -7,7 +7,8 @@ from pathlib import Path
 from .constants import to_cell
 from .generator import generate_candidates
 from .models import State, bitboard_from_cells
-from .serializer import write_candidates_json, write_candidates_jsonl, write_summary_json
+from .review import render_top_dicts
+from .serializer import write_candidates_ascii, write_candidates_json, write_candidates_jsonl, write_summary_json
 from .solver import solve
 
 
@@ -74,6 +75,7 @@ def _cmd_generate(
         reverse=True,
     )
     write_candidates_json(output_dir / "top_20.json", ranked[:20])
+    write_candidates_ascii(output_dir / "top_20.txt", ranked[:20])
     write_summary_json(output_dir / "summary.json", summary)
 
     print("CHAIN SHOT LEVEL GENERATOR v0.1")
@@ -140,6 +142,13 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Output directory. Default: output/run_<seed>",
     )
+    review_parser = subparsers.add_parser(
+        "review",
+        help="Render ranked candidate JSON as an ASCII board review",
+    )
+    review_parser.add_argument("path", type=Path)
+    review_parser.add_argument("--limit", type=int, default=20)
+
     return parser
 
 
@@ -149,6 +158,11 @@ def main() -> int:
 
     if args.command == "solve":
         return _cmd_solve(args.path, args.max_depth, args.max_states)
+
+    if args.command == "review":
+        data = json.loads(args.path.read_text(encoding="utf-8"))
+        print(render_top_dicts(data, limit=args.limit), end="")
+        return 0
 
     if args.command == "generate":
         output_dir = args.output or Path("output") / f"run_{args.seed}"
