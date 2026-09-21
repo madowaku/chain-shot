@@ -74,3 +74,7 @@ def test_summary_accounts_for_every_requested_board() -> None:
     )
     assert accounted == summary.requested
     assert summary.generated + summary.duplicates == summary.requested
+    assert sum(summary.par_distribution.values()) == summary.candidates
+    assert sum(summary.ball_count_distribution.values()) == summary.candidates
+    assert sum(summary.solution_count_distribution.values()) == summary.candidates
+    assert summary.unique_candidates == summary.solution_count_distribution.get("1", 0)
