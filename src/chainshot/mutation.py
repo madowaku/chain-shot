@@ -185,6 +185,110 @@ def mutate_state(
     ), operator
 
 
+
+def _aligned_add_options(parent: State) -> list[int]:
+    balls = set(cells_from_bitboard(parent.balls))
+    occupied = set(balls)
+    occupied.add(parent.cue)
+    anchors = occupied
+
+    options: list[int] = []
+    for cell in PLAYABLE_CELLS:
+        if cell in occupied:
+            continue
+        row, col = divmod(cell, BOARD_SIZE)
+        if any(
+            (anchor // BOARD_SIZE == row) or (anchor % BOARD_SIZE == col)
+            for anchor in anchors
+        ):
+            options.append(cell)
+    return options
+
+
+def mutate_state_v2(
+    parent: State,
+    rng: random.Random,
+    *,
+    min_balls: int = 3,
+    max_balls: int = 6,
+) -> tuple[State, str]:
+    """Identity-biased mutation learned from the v0.1 mining run.
+
+    Ball additions dominate when available, with aligned additions preferred
+    because CHAIN SHOT interactions are row/column based.
+    """
+    balls = list(cells_from_bitboard(parent.balls))
+    ball_count = len(balls)
+
+    operators: list[str] = ["cue_relocate", "ball_relocate"]
+    weights: list[float] = [1.0, 2.0]
+
+    if ball_count < max_balls:
+        operators.extend(["ball_add_aligned", "ball_add_random"])
+        weights.extend([5.0, 2.0])
+
+    if ball_count > min_balls:
+        operators.append("ball_remove")
+        weights.append(1.0)
+
+    operator = rng.choices(operators, weights=weights, k=1)[0]
+
+    if operator == "cue_relocate":
+        occupied = set(balls)
+        destination = _choose_destination(
+            rng,
+            origin=parent.cue,
+            occupied=occupied,
+        )
+        if destination is None:
+            return parent, operator
+        return State(cue=destination, balls=parent.balls), operator
+
+    if operator == "ball_relocate":
+        ball = rng.choice(balls)
+        occupied = set(balls)
+        occupied.remove(ball)
+        occupied.add(parent.cue)
+        destination = _choose_destination(
+            rng,
+            origin=ball,
+            occupied=occupied,
+        )
+        if destination is None:
+            return parent, operator
+        moved = add_ball(remove_ball(parent.balls, ball), destination)
+        return State(cue=parent.cue, balls=moved), operator
+
+    if operator in {"ball_add_aligned", "ball_add_random"}:
+        occupied = set(balls)
+        occupied.add(parent.cue)
+        if operator == "ball_add_aligned":
+            options = _aligned_add_options(parent)
+            if not options:
+                operator = "ball_add_random"
+                options = [
+                    cell for cell in PLAYABLE_CELLS
+                    if cell not in occupied
+                ]
+        else:
+            options = [
+                cell for cell in PLAYABLE_CELLS
+                if cell not in occupied
+            ]
+
+        if not options:
+            return parent, operator
+        return State(
+            cue=parent.cue,
+            balls=add_ball(parent.balls, rng.choice(options)),
+        ), operator
+
+    ball = rng.choice(balls)
+    return State(
+        cue=parent.cue,
+        balls=remove_ball(parent.balls, ball),
+    ), operator
+
 def load_top_generated_parents(
     path: Path,
     *,
