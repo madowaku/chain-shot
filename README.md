@@ -121,3 +121,29 @@ Each generation run also writes:
     output/run_<seed>/top_20.json
 
 This file is ranked by provisional interestingness, then difficulty. The weights are heuristics for triage, not claims about fun. Human playtesting should retune them.
+
+## Evaluator v0.2 benchmark
+
+Evaluator v0.2 treats a single cue-to-object collision as setup, not a chain.
+
+    true chain capacity = max(0, collision count - 1)
+
+Examples:
+
+    0 collisions -> chain 0
+    1 collision  -> chain 0
+    2 collisions -> chain 1
+    3 collisions -> chain 2
+
+Built-chain gain now compares this true chain capacity across the optimal path. Interestingness v0.2 also penalizes boards that never create a true multi-ball chain.
+
+To rescore the hand-authored Core 12 and an existing generated Top 20 from board state with exactly the same evaluator:
+
+    python -m chainshot benchmark --generated output/run_20260921/top_20.json
+
+The old scores stored in top_20.json are ignored. Every board is solved and analyzed again.
+
+Outputs:
+
+    output/run_20260921/benchmark_v02/combined_ranking.json
+    output/run_20260921/benchmark_v02/combined_ranking.txt
