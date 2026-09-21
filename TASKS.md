@@ -38,15 +38,15 @@ random board -> exact BFS solve -> feature analysis -> interestingness ranking -
 
 ## Phase 4: CHAIN SHOT metrics
 
-- [ ] Sink delay
-- [ ] Setup shots
-- [ ] Cue reposition shots
-- [ ] Ball transport distance
-- [ ] Max / average cascade
-- [ ] Built-chain gain
+- [x] Sink delay
+- [x] Setup shots
+- [x] Cue reposition shots
+- [x] Ball transport distance
+- [x] Max / average cascade
+- [x] Built-chain gain
 - [ ] Temptation traps
-- [ ] Direction diversity
-- [ ] Endgame payoff
+- [x] Direction diversity
+- [x] Endgame payoff
 - [ ] Difficulty score
 - [ ] Interestingness score
 
