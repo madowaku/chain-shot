@@ -1,4 +1,4 @@
-from chainshot.analyzer import analyze_path
+from chainshot.analyzer import analyze_path, temptation_directions
 from chainshot.constants import to_cell
 from chainshot.models import Direction, State, bitboard_from_cells
 
@@ -57,3 +57,12 @@ def test_not_yet_metrics_capture_setup_transport() -> None:
     assert metrics.max_cascade == 2
     assert metrics.direction_count == 3
     assert metrics.direction_changes == 3
+
+
+def test_dont_sink_yet_detects_immediate_sink_as_temptation() -> None:
+    initial = make_state(
+        (4, 6),
+        [(2, 6), (4, 5)],
+    )
+
+    assert temptation_directions(initial, 4) == (Direction.UP,)
