@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 from .analyzer import LevelMetrics, analyze_level
 from .constants import CELL_COUNT, POCKET_CELLS, to_coord
+from .evaluator import ScoreBundle, score_level
 from .models import State, bitboard_from_cells, cells_from_bitboard
 from .solver import SolveResult, solve
 from .symmetry import canonical_key
@@ -21,6 +22,7 @@ class Candidate:
     state: State
     solve_result: SolveResult
     metrics: LevelMetrics
+    scores: ScoreBundle
 
     def to_dict(self) -> dict:
         cue_row, cue_col = to_coord(self.state.cue)
@@ -37,6 +39,7 @@ class Candidate:
             "expandedStates": self.solve_result.expanded_states,
         }
         analysis.update(self.metrics.to_dict())
+        analysis.update(self.scores.to_dict())
 
         return {
             "id": self.candidate_id,
@@ -156,7 +159,8 @@ def generate_candidates(
                 candidate_id=f"GEN-{index:06d}",
                 state=state,
                 solve_result=result,
-                metrics=analyze_level(state, result),
+                metrics=(metrics := analyze_level(state, result, max_states=max_states)),
+                scores=score_level(result, metrics),
             )
         )
 
