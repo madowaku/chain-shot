@@ -74,3 +74,12 @@ random board -> exact BFS solve -> feature analysis -> interestingness ranking -
 - [x] Rebase built-chain gain on true chain capacity
 - [x] Add CHAIN SHOT identity penalties for no-chain boards
 - [x] Add mixed Core 12 + generated Top 20 benchmark
+
+## Mutation Generator v0.1
+
+- [x] Select top generated parents from Evaluator v0.2 benchmark
+- [x] Generate 500 seeded mutations per parent
+- [x] Canonical symmetry dedupe across parents and children
+- [x] Re-solve mutations with BFS
+- [x] Re-score with Evaluator v0.2
+- [x] Keep only children that beat their parent interestingness score
