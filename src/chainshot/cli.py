@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
+from .benchmark import benchmark_core_and_generated, render_benchmark, write_benchmark_json, write_benchmark_text
 from .constants import to_cell
 from .generator import generate_candidates
 from .models import State, bitboard_from_cells
@@ -149,6 +150,30 @@ def build_parser() -> argparse.ArgumentParser:
     review_parser.add_argument("path", type=Path)
     review_parser.add_argument("--limit", type=int, default=20)
 
+    benchmark_parser = subparsers.add_parser(
+        "benchmark",
+        help="Rescore Core 12 and generated Top 20 with Evaluator v0.2",
+    )
+    benchmark_parser.add_argument(
+        "--generated",
+        type=Path,
+        required=True,
+        help="Path to a generated top_20.json file",
+    )
+    benchmark_parser.add_argument(
+        "--core",
+        type=Path,
+        default=Path("fixtures") / "core12.json",
+    )
+    benchmark_parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+        help="Output directory. Default: alongside generated JSON in benchmark_v02/",
+    )
+    benchmark_parser.add_argument("--max-depth", type=int, default=12)
+    benchmark_parser.add_argument("--max-states", type=int, default=50_000)
+
     return parser
 
 
@@ -162,6 +187,20 @@ def main() -> int:
     if args.command == "review":
         data = json.loads(args.path.read_text(encoding="utf-8"))
         print(render_top_dicts(data, limit=args.limit), end="")
+        return 0
+
+    if args.command == "benchmark":
+        entries = benchmark_core_and_generated(
+            core_path=args.core,
+            generated_path=args.generated,
+            max_depth=args.max_depth,
+            max_states=args.max_states,
+        )
+        output_dir = args.output or args.generated.parent / "benchmark_v02"
+        write_benchmark_json(output_dir / "combined_ranking.json", entries)
+        write_benchmark_text(output_dir / "combined_ranking.txt", entries)
+        print(render_benchmark(entries), end="")
+        print(f"Output: {output_dir}")
         return 0
 
     if args.command == "generate":
