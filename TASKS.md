@@ -29,12 +29,12 @@ random board -> exact BFS solve -> feature analysis -> interestingness ranking -
 
 ## Phase 3: Generator
 
-- [ ] Seeded random board generation
-- [ ] Object-ball distribution: 3-6 balls
-- [ ] Symmetry canonicalization: identity / horizontal / vertical / 180 degrees
-- [ ] Duplicate filtering
-- [ ] Candidate range: 4-12 minimum moves
-- [ ] JSONL output
+- [x] Seeded random board generation
+- [x] Object-ball distribution: 3-6 balls
+- [x] Symmetry canonicalization: identity / horizontal / vertical / 180 degrees
+- [x] Duplicate filtering
+- [x] Candidate range: 4-12 minimum moves
+- [x] JSONL output
 
 ## Phase 4: CHAIN SHOT metrics
 
