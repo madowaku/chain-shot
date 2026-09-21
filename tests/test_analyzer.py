@@ -1,4 +1,4 @@
-from chainshot.analyzer import analyze_path, temptation_directions
+from chainshot.analyzer import analyze_path, temptation_directions, true_chain_capacity_from_collisions
 from chainshot.constants import to_cell
 from chainshot.models import Direction, State, bitboard_from_cells
 
@@ -68,3 +68,10 @@ def test_dont_sink_yet_detects_immediate_sink_as_temptation() -> None:
     )
 
     assert temptation_directions(initial, 4) == (Direction.UP,)
+
+
+def test_true_chain_capacity_starts_at_second_collision() -> None:
+    assert true_chain_capacity_from_collisions(0) == 0
+    assert true_chain_capacity_from_collisions(1) == 0
+    assert true_chain_capacity_from_collisions(2) == 1
+    assert true_chain_capacity_from_collisions(3) == 2
