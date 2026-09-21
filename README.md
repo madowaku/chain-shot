@@ -147,3 +147,26 @@ Outputs:
 
     output/run_20260921/benchmark_v02/combined_ranking.json
     output/run_20260921/benchmark_v02/combined_ranking.txt
+
+## Mutation Generator v0.1
+
+Use the mixed Evaluator v0.2 benchmark as the parent pool. The command selects the highest-ranked generated levels, mutates each parent, re-solves every unique child, re-scores it with Evaluator v0.2, and keeps only children whose interestingness score strictly exceeds their own parent.
+
+Mutation operators:
+
+- cue relocation
+- object-ball relocation
+- object-ball addition
+- object-ball removal
+
+Relocation prefers a one-cell orthogonal move 65% of the time when available, otherwise it jumps to another valid empty cell. Ball counts stay within 3-6.
+
+Run the default Top 3 x 500 search:
+
+    python -m chainshot mutate --parents output/run_20260921/benchmark_v02/combined_ranking.json --top 3 --per-parent 500 --seed 20260921
+
+Outputs:
+
+    output/run_20260921/benchmark_v02/mutation_v01/summary.json
+    output/run_20260921/benchmark_v02/mutation_v01/parent_beaters.json
+    output/run_20260921/benchmark_v02/mutation_v01/parent_beaters.txt
