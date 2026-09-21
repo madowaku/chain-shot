@@ -21,6 +21,8 @@ class PathMetrics:
     avg_cascade: float
     initial_cascade_capacity: int
     max_cascade_capacity: int
+    initial_chain_capacity: int
+    max_chain_capacity: int
     built_chain_gain: int
     temptation_count: int
     direction_count: int
@@ -39,6 +41,8 @@ class LevelMetrics:
     avg_cascade: float
     initial_cascade_capacity: int
     max_cascade_capacity: int
+    initial_chain_capacity: int
+    max_chain_capacity: int
     built_chain_gain: int
     temptation_count: int
     direction_count: float
@@ -56,6 +60,8 @@ class LevelMetrics:
             "avgCascade": round(self.avg_cascade, 3),
             "initialCascadeCapacity": self.initial_cascade_capacity,
             "maxCascadeCapacity": self.max_cascade_capacity,
+            "initialChainCapacity": self.initial_chain_capacity,
+            "maxChainCapacity": self.max_chain_capacity,
             "builtChainGain": self.built_chain_gain,
             "temptationCount": self.temptation_count,
             "directionCount": round(self.direction_count, 3),
@@ -63,6 +69,11 @@ class LevelMetrics:
             "endgameSinks": round(self.endgame_sinks, 3),
             "endgameSinkStreak": round(self.endgame_sink_streak, 3),
         }
+
+
+def true_chain_capacity_from_collisions(collisions: int) -> int:
+    """Count only handoffs beyond the first cue-to-object collision as chain depth."""
+    return max(0, collisions - 1)
 
 
 def cascade_capacity(state: State) -> int:
@@ -208,6 +219,8 @@ def analyze_path(
 
     initial_capacity = capacities[0]
     max_capacity = max(capacities, default=initial_capacity)
+    initial_chain_capacity = true_chain_capacity_from_collisions(initial_capacity)
+    max_chain_capacity = true_chain_capacity_from_collisions(max_capacity)
 
     return PathMetrics(
         sink_delay=sink_delay,
@@ -218,7 +231,9 @@ def analyze_path(
         avg_cascade=fmean(cascades) if cascades else 0.0,
         initial_cascade_capacity=initial_capacity,
         max_cascade_capacity=max_capacity,
-        built_chain_gain=max(0, max_capacity - initial_capacity),
+        initial_chain_capacity=initial_chain_capacity,
+        max_chain_capacity=max_chain_capacity,
+        built_chain_gain=max(0, max_chain_capacity - initial_chain_capacity),
         temptation_count=len(temptation_pairs),
         direction_count=direction_count,
         direction_changes=direction_changes,
@@ -250,6 +265,8 @@ def analyze_level(
         avg_cascade=fmean(path.avg_cascade for path in paths),
         initial_cascade_capacity=paths[0].initial_cascade_capacity,
         max_cascade_capacity=max(path.max_cascade_capacity for path in paths),
+        initial_chain_capacity=paths[0].initial_chain_capacity,
+        max_chain_capacity=max(path.max_chain_capacity for path in paths),
         built_chain_gain=max(path.built_chain_gain for path in paths),
         temptation_count=max(path.temptation_count for path in paths),
         direction_count=fmean(path.direction_count for path in paths),
